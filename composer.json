@@ -1,0 +1,13 @@
+{
+    "name": "vendi-advertising/a11y-report-viewer",
+    "type": "project",
+    "authors": [
+        {
+            "name": "cjhaas",
+            "email": "chris@vendiadvertising.com"
+        }
+    ],
+    "require": {
+        "webmozart/path-util": "^2.3"
+    }
+}

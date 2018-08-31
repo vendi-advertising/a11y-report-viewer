@@ -1,0 +1,36 @@
+thead td
+{
+    rotate: -90deg;
+}
+
+tbody td
+{
+    text-align: center;
+}
+
+tbody td.url
+{
+    text-align: left;
+}
+
+tbody td[data-rule-value="inapplicable"]
+{
+    background-color: #eeeeee;
+    font-size: 0;
+}
+
+tbody td[data-rule-value="violations"]
+{
+    background-color: #FF9999;
+}
+
+
+tbody td[data-rule-value="passes"]
+{
+    background-color: #99FF99;
+}
+
+tbody td[data-rule-value="incomplete"]
+{
+    background-color: #FFFF99;
+}
