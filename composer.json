@@ -8,6 +8,7 @@
         }
     ],
     "require": {
-        "webmozart/path-util": "^2.3"
+        "webmozart/path-util": "^2.3",
+        "vendi-advertising/vendi-shared-utils": "^4.0"
     }
 }

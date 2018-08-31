@@ -1,144 +1,75 @@
 <?php
 
+use Vendi\Shared\utils;
 use Webmozart\PathUtil\Path;
 
 define('VENDI_A11Y_FILE', __FILE__);
 define('VENDI_A11Y_DIR', __DIR__ );
 
 require_once VENDI_A11Y_DIR . '/vendor/autoload.php';
+require_once VENDI_A11Y_DIR . '/src/Page.php';
+require_once VENDI_A11Y_DIR . '/src/Rule.php';
+require_once VENDI_A11Y_DIR . '/src/TableMaker.php';
 
-$report_file = 'FILE_PATH_HERE'
-
-$file_data = file_get_contents($report_file);
-
-$raw_data = json_decode($file_data);
-
-$final_data = $raw_data->final_data;
-
-class Page
-{
-    public $url;
-
-    public $violations;
-
-    public $passes;
-
-    public $incomplete;
-
-    public $inapplicable;
+//Create a list of all of the files in the reports folder
+$files_with_hashes = [];
+$files = array_diff(scandir(Path::join(VENDI_A11Y_DIR, 'reports')), ['..', '.']);
+foreach($files as $idx => $name ){
+    $files_with_hashes[\md5($name)] = $name;
 }
 
-$urls = [];
-foreach($final_data as $idx => $d){
-    $p = new Page();
-    $p->url = $d->url;
-    foreach(['violations', 'passes', 'incomplete', 'inapplicable'] as $k){
-        $value = $d->report->$k;
-        $p->$k = $value;
-    }
-    $urls[] = $p;
+//See if the user provided a specific report to view
+$selected_file_hash = utils::get_get_value('file_hash');
+$selected_tag = utils::get_get_value('tag');
+$table_maker = null;
+if($selected_file_hash && array_key_exists($selected_file_hash, $files_with_hashes)){
+    $report_file = Path::join(VENDI_A11Y_DIR, 'reports', $files_with_hashes[$selected_file_hash]);
+    $table_maker = TableMaker::create_from_file($report_file);
 }
 
-class Rule
-{
-    public $id;             //": "aria-allowed-role"
-    public $impact;         //": null
-    public $tags;           //": array:2 [▶]
-    public $description;    //": "Ensures role attribute has an appropriate value for the element"
-    public $help;           //": "ARIA role must be appropriate for the element"
-    public $helpUrl;        //": "https://dequeuniversity.com/rules/axe/3.1/aria-allowed-role?application=axeAPI"
-}
-
-$rules = [];
-foreach($urls as $p){
-    foreach(['violations', 'passes', 'incomplete', 'inapplicable'] as $thing){
-        foreach($p->$thing as $rule){
-            if(!array_key_exists($rule->id, $rules)){
-                $rr = new Rule();
-                foreach(['id', 'impact', 'tags', 'description', 'help', 'helpUrl'] as $k){
-                    $rr->$k = $rule->$k;
-                }
-                $rules[$rule->id] = $rr;
-            }
+?><!doctype html>
+<html lang="en">
+<head>
+<title>Report</title>
+<link rel="stylesheet" href="./css/app.css" />
+</head>
+<body>
+<form method="get">
+    <select name="file_hash">
+        <option>Select one</option>
+        <?php
+        foreach($files_with_hashes as $hash => $name ){
+            echo sprintf(
+                            '<option value="%1$s" %3$s>%2$s</option>',
+                            $hash,
+                            \htmlspecialchars($name),
+                            $selected_file_hash === $hash ? 'selected' : ''
+                    );
         }
-    }
-}
-
-echo '<!doctype html>';
-echo '<html lang="en">';
-echo '<head>';
-echo '<title>Report</title>';
-echo '<link rel="stylesheet" href="./css/app.css" />';
-echo '</head>';
-echo '<body>';
-echo '<table>';
-echo '<thead>';
-echo '<tr>';
-echo '<td class="url">&nbsp;</td>';
-foreach($rules as $rule){
-    echo sprintf('<td class="rule-%2$s" data-rule-id="%2$s">%1$s</td>', htmlspecialchars($rule->id), htmlspecialchars($rule->id) );
-}
-echo '</tr>';
-echo '</thead>';
-echo '<tbody>';
-foreach($urls as $url){
-    $short = str_replace('https://www.DOMAIN.com', '', $url->url);
-    if(0 === strpos(strrev($short), strrev('.pdf'))){
-        continue;
-    }
-    if(0 === strpos(strrev($short), strrev('.jpg'))){
-        continue;
-    }
-    if(0 === strpos(strrev($short), strrev('.gif'))){
-        continue;
-    }
-    if(0 === strpos(strrev($short), strrev('.png'))){
-        continue;
-    }
-    if($short === ''){
-        $short = '/';
-    }
-    echo '<tr>';
-    echo sprintf('<td class="url"><a href="%1$s" target="_blank">%2$s</a></td>', urlencode($url->url), htmlspecialchars($short));
-
-    foreach($rules as $rule){
-        $rule_code = null;
-        $text_code = null;
-
-        $things = [
-                    'violations' => '&#x2715;',
-                    'passes' => '&#x2714;',
-                    'incomplete' => '?',
-                    'inapplicable' => 'n/a',
-            ];
-
-        foreach($things as $thing => $text){
-            foreach($url->$thing as $t){
-                if($t->id === $rule->id){
-                    $rule_code = $thing;
-                    $text_code = $text;
-                    break;
-                }
+        ?>
+    </select>
+    &nbsp;
+    <?php
+        if($table_maker){
+            echo '<select name="tag">';
+            echo '<option>Select one</option>';
+            foreach($table_maker->get_tags() as $tag){
+                echo sprintf(
+                                '<option value="%1$s" %2$s>%1$s</option>',
+                                htmlspecialchars($tag),
+                                $selected_tag === $tag ? 'selected' : ''
+                        );
             }
-            if($rule_code){
-                break;
-            }
+            echo '</select>';
         }
-
-        echo sprintf('<td class="rule-%2$s" data-rule-id="%2$s" data-rule-value="%1$s">%3$s</td>', htmlspecialchars($rule_code), htmlspecialchars($rule->id), $text_code);
-    }
-    echo '</tr>';
+    ?>
+    <input type="submit" value="Select file" />
+</form>
+<?php
+if($table_maker){
+    echo $table_maker->get_table();
 }
-echo '</tbody>';
-echo '<tfoot>';
-echo '<tr>';
-echo '<td>&nbsp;</td>';
-foreach($rules as $rule){
-    echo sprintf('<td data-rule-id="%2$s"></td>', htmlspecialchars($rule->id), htmlspecialchars($rule->id) );
-}
-echo '</tr>';
-echo '</tfoot>';
-echo '</table>';
-echo '<script type="text/javascript" src="./js/app.js"></script>';
-echo '</body>';
-echo '</html>';
+?>
+<script type="text/javascript" src="./js/app.js"></script>
+</body>
+</html>

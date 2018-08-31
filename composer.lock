@@ -4,8 +4,55 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "49439f741aa8e9d79fcdbea9d09dd5dc",
+    "content-hash": "52430137e4212ab5779698d013873794",
     "packages": [
+        {
+            "name": "vendi-advertising/vendi-shared-utils",
+            "version": "4.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/vendi-advertising/vendi-shared-utils.git",
+                "reference": "f1739d71a146e105e69ef1aa90cdab04c9ebb60f"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/vendi-advertising/vendi-shared-utils/zipball/f1739d71a146e105e69ef1aa90cdab04c9ebb60f",
+                "reference": "f1739d71a146e105e69ef1aa90cdab04c9ebb60f",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.0.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "*",
+                "scrutinizer/ocular": "*"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Vendi\\Shared\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Chris Haas",
+                    "email": "chris@vendiadvertising.com",
+                    "homepage": "https://www.vendiadvertising.com/",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Helper class shared across all Vendi-controlled properties",
+            "homepage": "https://github.com/vendi-advertising/vendi-shared-utils",
+            "keywords": [
+                "vendi",
+                "vendi-advertising"
+            ],
+            "time": "2017-06-19T20:58:25+00:00"
+        },
         {
             "name": "webmozart/assert",
             "version": "1.3.0",

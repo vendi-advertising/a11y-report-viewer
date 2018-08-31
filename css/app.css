@@ -1,6 +1,7 @@
-thead td
+thead td p
 {
-    rotate: -90deg;
+  writing-mode: vertical-lr;
+
 }
 
 tbody td
